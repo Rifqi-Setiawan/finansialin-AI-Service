@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+pydantic
+python-dotenv
+httpx
+redis
+langchain
+langchain-core
+langchain-google-genai
+langgraph
+pyasn1>=0.5.0

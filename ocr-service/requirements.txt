@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+python-multipart
+python-dotenv
+redis
+torch
+torchvision
+transformers
+sentencepiece
+protobuf
+Pillow
+langchain-google-genai
