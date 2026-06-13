@@ -3,6 +3,42 @@ import time
 from PIL import Image
 import torch
 
+def clean_price(raw_price):
+    if not raw_price:
+        return 0.0
+    try:
+        price_str = str(raw_price).strip()
+        amount_part = re.sub(r'[^\d\.,]', '', price_str)
+        if not amount_part:
+            return 0.0
+
+        # Indonesian receipts usually use "." or "," as thousand separators
+        # (43.000 => 43000, 93.200 => 93200). If a real decimal suffix exists
+        # after a larger integer value (43000.00 or 43.000,00), remove only
+        # that cents suffix. Keep OCR-ish values like 932.00 as 93200 because
+        # they often originate from 93.200.
+        last_dot = amount_part.rfind(".")
+        last_comma = amount_part.rfind(",")
+        last_sep = max(last_dot, last_comma)
+
+        if last_sep >= 0:
+            before = amount_part[:last_sep]
+            after = amount_part[last_sep + 1:]
+            before_digits = re.sub(r'\D', '', before)
+            has_other_separator = any(sep in before for sep in [".", ","])
+
+            if len(after) == 2 and (has_other_separator or len(before_digits) > 3):
+                amount_part = before
+
+        clean = re.sub(r'\D', '', amount_part)
+        if not clean:
+            return 0.0
+
+        return float(clean)
+    except:
+        pass
+    return 0.0
+
 def extract_receipt_data(image: Image.Image, processor, model, device) -> tuple[dict, dict]:
     timings = {}
     
@@ -63,20 +99,6 @@ def extract_receipt_data(image: Image.Image, processor, model, device) -> tuple[
                 val = data[key]
                 return val[0] if isinstance(val, list) and len(val) > 0 else val
         return default
-
-    def clean_price(raw_price):
-        if not raw_price:
-            return 0.0
-        try:
-            price_str = str(raw_price)
-            clean = re.sub(r'[^\d]', '', price_str)
-            if price_str.endswith(',00') or price_str.endswith('.00'):
-                clean = clean[:-2]
-            if clean:
-                return float(clean)
-        except:
-            pass
-        return 0.0
 
     merchant_name = None
     total_amount = 0.0

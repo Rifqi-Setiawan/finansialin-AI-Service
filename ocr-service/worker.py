@@ -30,6 +30,17 @@ processor = None
 model = None
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
+def resolve_image_path(image_path: str) -> str:
+    api_image_dir = os.getenv("OCR_IMAGE_DIR", "/tmp/ocr_images").replace("\\", "/").rstrip("/")
+    worker_image_dir = os.getenv("OCR_WORKER_IMAGE_DIR", "").strip()
+    normalized_path = image_path.replace("\\", "/")
+
+    if worker_image_dir and normalized_path.startswith(f"{api_image_dir}/"):
+        relative_path = normalized_path[len(api_image_dir):].lstrip("/")
+        return os.path.join(worker_image_dir, *relative_path.split("/"))
+
+    return image_path
+
 def init_donut_model():
     global processor, model
     if hasattr(import_utils, 'check_torch_load_is_safe'):
@@ -126,7 +137,7 @@ while True:
         _, job_data_str = job
         job_data = json.loads(job_data_str)
         job_id = job_data["job_id"]
-        image_path = job_data["image_path"]
+        image_path = resolve_image_path(job_data["image_path"])
         
         print(f"\nProcessing job: {job_id}")
         redis_client.set(f"ocr:job:{job_id}", "processing", ex=3600)

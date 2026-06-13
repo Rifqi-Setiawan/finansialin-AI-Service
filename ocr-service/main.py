@@ -12,6 +12,7 @@ app = FastAPI(title="Finansialin OCR Service API")
 # Initialize Redis client
 redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 redis_client = redis.from_url(redis_url, decode_responses=True)
+image_dir = os.getenv("OCR_IMAGE_DIR", "/tmp/ocr_images")
 
 @app.post("/ocr/jobs", status_code=202)
 async def submit_ocr_job(receiptImage: UploadFile = File(...)):
@@ -26,8 +27,8 @@ async def submit_ocr_job(receiptImage: UploadFile = File(...)):
     job_id = str(uuid.uuid4())
     
     # Simpan gambar sementara (di worker nanti akan dibaca)
-    os.makedirs("/tmp/ocr_images", exist_ok=True)
-    image_path = f"/tmp/ocr_images/{job_id}.img"
+    os.makedirs(image_dir, exist_ok=True)
+    image_path = os.path.join(image_dir, f"{job_id}.img")
     with open(image_path, "wb") as f:
         f.write(contents)
         

@@ -1,5 +1,7 @@
 # Environments
 env/
+env-chatbot/
+env-ocr/
 venv/
 .venv/
 
@@ -7,6 +9,23 @@ venv/
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Python tooling caches and test artifacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.ipynb_checkpoints/
+pip-wheel-metadata/
+*.egg-info/
+
+# Build outputs
+build/
+dist/
 
 # Models and checkpoints
 *.safetensors
@@ -16,21 +35,19 @@ __pycache__/
 *.h5
 *.onnx
 
+# Runtime OCR artifacts
+ocr-shared/*
+!ocr-shared/.gitkeep
+
 # Logs and databases
 *.log
 *.sqlite3
 *.db
 
-# Caches and testing
-.pytest_cache/
-.mypy_cache/
-.tox/
-.coverage
-htmlcov/
-
 # Environment variables
 .env
 .env.*
+!.env.example
 
 # OS generated files
 .DS_Store
@@ -44,3 +61,4 @@ Thumbs.db
 
 # Custom/Temporary files
 test.txt
+prompt-*.md
