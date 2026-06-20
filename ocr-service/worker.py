@@ -130,7 +130,7 @@ print("Worker started. Waiting for jobs...")
 
 while True:
     try:
-        job = redis_client.blpop("ocr:queue", timeout=0)
+        job = redis_client.blpop("ocr:queue", timeout=1)
         if not job:
             continue
             
